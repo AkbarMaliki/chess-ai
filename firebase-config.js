@@ -3,12 +3,12 @@
 // Jika database dibuat di region Singapura, formatnya:
 //   https://pos-kasir-default-rtdb.asia-southeast1.firebasedatabase.app
 window.CHESS_FIREBASE_CONFIG = {
-  apiKey: "AIzaSyAyvbE3CBnxqV6wh4s1xTRwjKzq5zSYtRk",
-  authDomain: "vuez-63625.firebaseapp.com",
-  databaseURL: "https://vuez-63625.firebaseio.com",
-  projectId: "vuez-63625",
-  storageBucket: "vuez-63625.appspot.com",
-  messagingSenderId: "527099963081",
-  appId: "1:527099963081:web:6422331458f6048b098f18",
-  measurementId: "G-S2B09P6X2W"
+  apiKey: 'AIzaSyB_Zz_dDRCd8hiQ9PT2A1vkXtq_FQFb_Ng',
+  authDomain: 'pos-kasir.firebaseapp.com',
+  databaseURL: 'https://pos-kasir-default-rtdb.firebaseio.com',
+  projectId: 'pos-kasir',
+  storageBucket: 'pos-kasir.appspot.com',
+  messagingSenderId: '891526924127',
+  appId: '1:891526924127:web:a00309b9803da97144d8ea',
+  measurementId: 'G-XP56EMR306',
 };
