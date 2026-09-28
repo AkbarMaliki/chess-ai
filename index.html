@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0620" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Chess 3D Online</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="scene"></div>
+
+  <!-- ===== HUD dalam game ===== -->
+  <div id="hud" hidden>
+    <div class="pbar" id="barTop">
+      <span class="pdot"></span>
+      <div class="pinfo">
+        <div class="pname">-</div>
+        <div class="pmeta"><span class="ptag"></span><span class="pcap"></span></div>
+      </div>
+      <div class="pclock" hidden>0:00</div>
+    </div>
+    <div class="pbar" id="barBottom">
+      <span class="pdot"></span>
+      <div class="pinfo">
+        <div class="pname">-</div>
+        <div class="pmeta"><span class="ptag"></span><span class="pcap"></span></div>
+      </div>
+      <div class="pclock" hidden>0:00</div>
+    </div>
+
+    <aside id="side" class="panel">
+      <div class="side-head">
+        <span class="label" id="modeLabel">MODE</span>
+        <span id="turnLabel" class="turn"></span>
+      </div>
+      <div id="moves" class="moves"></div>
+      <div class="actions">
+        <button id="btnUndo" class="mini">↶ Undo</button>
+        <button id="btnDraw" class="mini">½ Remis</button>
+        <button id="btnResign" class="mini danger">⚑ Menyerah</button>
+        <button id="btnClaim" class="mini accent" hidden>🏆 Klaim Menang</button>
+      </div>
+      <div id="chat" hidden>
+        <div id="chatLog"></div>
+        <form id="chatForm" autocomplete="off">
+          <input id="chatInput" maxlength="200" placeholder="Ketik pesan…" />
+          <button class="mini" type="submit">Kirim</button>
+        </form>
+      </div>
+    </aside>
+  </div>
+
+  <div id="topbar">
+    <button id="btnHome" class="icon-btn" title="Menu" hidden>⌂</button>
+    <button id="btnPanel" class="icon-btn" title="Langkah & chat" hidden>☰<i id="chatBadge" hidden></i></button>
+    <button id="btnFlip" class="icon-btn" title="Putar papan (F)">⟲</button>
+    <button id="btnSound" class="icon-btn" title="Suara (M)">🔊</button>
+  </div>
+
+  <div id="toast"></div>
+  <div id="offerBar" hidden>
+    <span id="offerText"></span>
+    <button id="offerYes" class="mini accent">Terima</button>
+    <button id="offerNo" class="mini">Tolak</button>
+  </div>
+
+  <!-- ===== Overlay & kartu menu ===== -->
+  <div id="overlay">
+    <div class="card" id="menuCard">
+      <h1 class="logo">CHESS<span>3D</span></h1>
+      <p class="sub">Catur 3D — lawan teman online, bot, atau main berdua.</p>
+      <label class="field">Nama kamu
+        <input id="nameInput" maxlength="16" placeholder="Nama pemain" />
+      </label>
+      <button id="goOnline" class="btn">🌐 MAIN ONLINE</button>
+      <button id="goResume" class="btn ghost" hidden>↻ LANJUTKAN GAME ONLINE</button>
+      <button id="goBot" class="btn ghost">🤖 LAWAN BOT</button>
+      <button id="goLocal" class="btn ghost">👥 2 PEMAIN (1 LAYAR)</button>
+      <a class="back-link" href="../">← Kembali ke Tetris 3D</a>
+    </div>
+
+    <div class="card" id="botCard" hidden>
+      <h2>LAWAN BOT</h2>
+      <div class="label left">Tingkat kesulitan</div>
+      <div class="seg" id="botLevel">
+        <button data-v="easy">😊 Easy</button>
+        <button data-v="medium">😐 Medium</button>
+        <button data-v="hard">😈 Hard</button>
+      </div>
+      <p class="hint" id="botLevelHint"></p>
+      <div class="label left">Main sebagai</div>
+      <div class="seg" id="botColor">
+        <button data-v="w">♔ Putih</button>
+        <button data-v="r">🎲 Acak</button>
+        <button data-v="b">♚ Hitam</button>
+      </div>
+      <button id="botStart" class="btn">MULAI</button>
+      <button class="btn ghost" data-back="menuCard">KEMBALI</button>
+    </div>
+
+    <div class="card wide" id="lobbyCard" hidden>
+      <div class="lobby-head">
+        <h2>LOBBY</h2>
+        <div class="conn"><i id="connDot"></i><span id="connText">Menghubungkan…</span></div>
+      </div>
+      <div id="lobbyError" class="error" hidden></div>
+      <div class="label left">Kontrol waktu</div>
+      <div class="seg" id="tcSeg">
+        <button data-v="1|0">1+0<small>Bullet</small></button>
+        <button data-v="3|2">3+2<small>Blitz</small></button>
+        <button data-v="5|0">5+0<small>Blitz</small></button>
+        <button data-v="10|0">10+0<small>Rapid</small></button>
+        <button data-v="0|0">∞<small>Santai</small></button>
+      </div>
+      <button id="findBtn" class="btn">⚡ CARI LAWAN</button>
+
+      <div class="lobby-grid">
+        <div class="box">
+          <div class="label left">Buat room</div>
+          <div class="seg small" id="roomColor">
+            <button data-v="w">♔ Putih</button>
+            <button data-v="r">🎲 Acak</button>
+            <button data-v="b">♚ Hitam</button>
+          </div>
+          <label class="check"><input type="checkbox" id="roomPriv" /> Private (hanya lewat kode)</label>
+          <button id="createBtn" class="btn ghost">＋ BUAT ROOM</button>
+        </div>
+        <div class="box">
+          <div class="label left">Gabung pakai kode</div>
+          <form id="joinForm" class="row" autocomplete="off">
+            <input id="codeInput" maxlength="6" placeholder="KODE" />
+            <button class="btn ghost slim" type="submit">GABUNG</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="label left">Room terbuka</div>
+      <div id="roomList" class="room-list"><div class="empty">Memuat…</div></div>
+      <button class="btn ghost" id="lobbyBack">KEMBALI</button>
+    </div>
+
+    <div class="card" id="searchCard" hidden>
+      <h2>MENCARI LAWAN</h2>
+      <div class="spinner"><span>♞</span></div>
+      <div class="search-info"><b id="searchTc">3+2</b> · <span id="searchTime">0:00</span></div>
+      <p class="hint">Kamu akan dipasangkan otomatis dengan pemain lain yang juga mencari lawan dengan waktu yang sama.</p>
+      <button id="searchCancel" class="btn ghost">BATAL</button>
+    </div>
+
+    <div class="card" id="waitCard" hidden>
+      <h2>ROOM DIBUAT</h2>
+      <p class="sub">Bagikan kode ini ke temanmu</p>
+      <div class="room-code" id="waitCode">------</div>
+      <button id="copyLink" class="btn ghost">📋 SALIN LINK</button>
+      <div class="waiting"><span class="dots"></span> Menunggu lawan bergabung…</div>
+      <button id="waitCancel" class="btn ghost">BATALKAN</button>
+    </div>
+
+    <div class="card" id="promoCard" hidden>
+      <h2>PROMOSI</h2>
+      <div class="promo" id="promoChoices"></div>
+      <button class="btn ghost" id="promoCancel">BATAL</button>
+    </div>
+
+    <div class="card" id="confirmCard" hidden>
+      <h2 id="confirmTitle">YAKIN?</h2>
+      <p class="sub" id="confirmText"></p>
+      <button id="confirmYes" class="btn">YA</button>
+      <button id="confirmNo" class="btn ghost">TIDAK</button>
+    </div>
+
+    <div class="card" id="overCard" hidden>
+      <h2 id="overTitle">SKAK MAT</h2>
+      <div class="result-icon" id="overIcon">♚</div>
+      <p class="sub" id="overReason"></p>
+      <div id="rematchInfo" class="hint" hidden></div>
+      <button id="overRematch" class="btn">REMATCH</button>
+      <button id="overAgain" class="btn">MAIN LAGI</button>
+      <button id="overView" class="btn ghost">LIHAT PAPAN</button>
+      <button id="overMenu" class="btn ghost">MENU</button>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="engine.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
